@@ -1,8 +1,8 @@
 {
   "id": "redis-state-tool",
-  "name": "Redis State Tool",
-  "version": "1.0.0",
-  "description": "Redis-backed shared runtime state and stream tools for QwenPaw agents",
+  "name": "Redis Runtime Cache",
+  "version": "1.0.1",
+  "description": "Redis-backed runtime cache for QwenPaw agents. It lets agents, skills, and plugins keep short-lived execution state outside the LLM context and local files, with TTL, namespace isolation, sensitive-field masking, and lightweight stream support.",
   "author": "Felix MA",
   "entry": {
     "backend": "redis_state.py"
@@ -13,7 +13,7 @@
     "tools": [
       {
         "name": "redis_state_set",
-        "description": "Store JSON-serializable temporary runtime state in Redis with TTL. Configure Redis here once; every redis_state_* and redis_stream_* tool shares this configuration.",
+        "description": "Store short-lived agent runtime state outside the LLM context and local files. Use it for temporary API state, session data, workflow checkpoints, or plugin handoff payloads. Values are stored in Redis with TTL and namespace isolation. Configure Redis here once; every redis_state_* and redis_stream_* tool shares this configuration.",
         "icon": "🧠",
         "requires_config": true,
         "config_fields": [
@@ -23,7 +23,7 @@
             "type": "password",
             "required": true,
             "placeholder": "redis://:password@localhost:6379/0",
-            "help": "Shared Redis connection URL used by all Redis State tools."
+            "help": "Shared Redis connection URL used by all Redis Runtime Cache tools."
           },
           {
             "name": "key_prefix",
@@ -41,7 +41,7 @@
             "default": 3600,
             "min": 1,
             "max": 86400,
-            "help": "Default TTL used by redis_state_set when ttl_seconds is omitted."
+            "help": "Default lifetime for cached runtime state when ttl_seconds is omitted."
           },
           {
             "name": "max_ttl_seconds",
@@ -67,55 +67,55 @@
       },
       {
         "name": "redis_state_get",
-        "description": "Read temporary runtime state from Redis by key. Sensitive fields are masked by default. Uses redis_state_set shared configuration.",
+        "description": "Retrieve previously stored agent runtime state from Redis without keeping the value in conversation context or local files. Sensitive fields are masked by default. Uses redis_state_set shared configuration.",
         "icon": "📦",
         "requires_config": false
       },
       {
         "name": "redis_state_delete",
-        "description": "Delete temporary runtime state from Redis by key. Uses redis_state_set shared configuration.",
+        "description": "Delete temporary agent runtime state when a skill, plugin, or workflow step no longer needs it. Uses redis_state_set shared configuration.",
         "icon": "🗑️",
         "requires_config": false
       },
       {
         "name": "redis_state_exists",
-        "description": "Check whether a temporary runtime state key exists in Redis. Uses redis_state_set shared configuration.",
+        "description": "Check whether reusable runtime state already exists before deciding whether to re-run an external API call or tool step. Uses redis_state_set shared configuration.",
         "icon": "🔎",
         "requires_config": false
       },
       {
         "name": "redis_state_ttl",
-        "description": "Get remaining TTL for a temporary runtime state key. Uses redis_state_set shared configuration.",
+        "description": "Inspect the remaining lifetime of cached runtime state to decide whether it should be reused or refreshed. Uses redis_state_set shared configuration.",
         "icon": "⏳",
         "requires_config": false
       },
       {
         "name": "redis_stream_add",
-        "description": "Append an event object to a Redis Stream for async workflows or agent handoff. Uses redis_state_set shared configuration.",
+        "description": "Append a lightweight runtime event for async workflows, plugin-to-plugin coordination, approval handoff, or subagent task handoff. Uses redis_state_set shared configuration.",
         "icon": "📨",
         "requires_config": false
       },
       {
         "name": "redis_stream_read",
-        "description": "Read recent events from a Redis Stream without consumer groups. Uses redis_state_set shared configuration.",
+        "description": "Read recent runtime events for inspection or simple polling. Uses redis_state_set shared configuration.",
         "icon": "📬",
         "requires_config": false
       },
       {
         "name": "redis_stream_group_create",
-        "description": "Create a Redis Stream consumer group, optionally creating the stream if it does not exist. Uses redis_state_set shared configuration.",
+        "description": "Create a consumer group for reliable runtime event processing by multiple agents or workers. Uses redis_state_set shared configuration.",
         "icon": "👥",
         "requires_config": false
       },
       {
         "name": "redis_stream_read_group",
-        "description": "Read Redis Stream events as a consumer-group consumer for reliable async processing. Uses redis_state_set shared configuration.",
+        "description": "Read runtime events as a named consumer in a group, suitable for distributed agent or task processing. Uses redis_state_set shared configuration.",
         "icon": "📥",
         "requires_config": false
       },
       {
         "name": "redis_stream_ack",
-        "description": "Acknowledge one or more Redis Stream message IDs in a consumer group. Uses redis_state_set shared configuration.",
+        "description": "Acknowledge processed runtime events after a workflow step completes successfully. Uses redis_state_set shared configuration.",
         "icon": "✅",
         "requires_config": false
       }
