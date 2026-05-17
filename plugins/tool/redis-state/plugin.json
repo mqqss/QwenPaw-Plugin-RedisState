@@ -1,0 +1,124 @@
+{
+  "id": "redis-state-tool",
+  "name": "Redis State Tool",
+  "version": "1.0.0",
+  "description": "Redis-backed shared runtime state and stream tools for QwenPaw agents",
+  "author": "Felix MA",
+  "entry": {
+    "backend": "redis_state.py"
+  },
+  "dependencies": ["redis>=5.0.0"],
+  "min_version": "1.1.6",
+  "meta": {
+    "tools": [
+      {
+        "name": "redis_state_set",
+        "description": "Store JSON-serializable temporary runtime state in Redis with TTL. Configure Redis here once; every redis_state_* and redis_stream_* tool shares this configuration.",
+        "icon": "🧠",
+        "requires_config": true,
+        "config_fields": [
+          {
+            "name": "redis_url",
+            "label": "Redis URL",
+            "type": "password",
+            "required": true,
+            "placeholder": "redis://:password@localhost:6379/0",
+            "help": "Shared Redis connection URL used by all Redis State tools."
+          },
+          {
+            "name": "key_prefix",
+            "label": "Redis Key Prefix",
+            "type": "text",
+            "required": false,
+            "default": "qwenpaw",
+            "help": "Prefix for keys created by this plugin, for example qwenpaw:runtime:..."
+          },
+          {
+            "name": "default_ttl_seconds",
+            "label": "Default TTL Seconds",
+            "type": "number",
+            "required": false,
+            "default": 3600,
+            "min": 1,
+            "max": 86400,
+            "help": "Default TTL used by redis_state_set when ttl_seconds is omitted."
+          },
+          {
+            "name": "max_ttl_seconds",
+            "label": "Max TTL Seconds",
+            "type": "number",
+            "required": false,
+            "default": 86400,
+            "min": 1,
+            "max": 604800,
+            "help": "Upper bound for ttl_seconds, used to avoid accidental long-lived temporary state."
+          },
+          {
+            "name": "max_value_bytes",
+            "label": "Max Value Bytes",
+            "type": "number",
+            "required": false,
+            "default": 65536,
+            "min": 1024,
+            "max": 10485760,
+            "help": "Maximum serialized JSON payload size accepted by redis_state_set."
+          }
+        ]
+      },
+      {
+        "name": "redis_state_get",
+        "description": "Read temporary runtime state from Redis by key. Sensitive fields are masked by default. Uses redis_state_set shared configuration.",
+        "icon": "📦",
+        "requires_config": false
+      },
+      {
+        "name": "redis_state_delete",
+        "description": "Delete temporary runtime state from Redis by key. Uses redis_state_set shared configuration.",
+        "icon": "🗑️",
+        "requires_config": false
+      },
+      {
+        "name": "redis_state_exists",
+        "description": "Check whether a temporary runtime state key exists in Redis. Uses redis_state_set shared configuration.",
+        "icon": "🔎",
+        "requires_config": false
+      },
+      {
+        "name": "redis_state_ttl",
+        "description": "Get remaining TTL for a temporary runtime state key. Uses redis_state_set shared configuration.",
+        "icon": "⏳",
+        "requires_config": false
+      },
+      {
+        "name": "redis_stream_add",
+        "description": "Append an event object to a Redis Stream for async workflows or agent handoff. Uses redis_state_set shared configuration.",
+        "icon": "📨",
+        "requires_config": false
+      },
+      {
+        "name": "redis_stream_read",
+        "description": "Read recent events from a Redis Stream without consumer groups. Uses redis_state_set shared configuration.",
+        "icon": "📬",
+        "requires_config": false
+      },
+      {
+        "name": "redis_stream_group_create",
+        "description": "Create a Redis Stream consumer group, optionally creating the stream if it does not exist. Uses redis_state_set shared configuration.",
+        "icon": "👥",
+        "requires_config": false
+      },
+      {
+        "name": "redis_stream_read_group",
+        "description": "Read Redis Stream events as a consumer-group consumer for reliable async processing. Uses redis_state_set shared configuration.",
+        "icon": "📥",
+        "requires_config": false
+      },
+      {
+        "name": "redis_stream_ack",
+        "description": "Acknowledge one or more Redis Stream message IDs in a consumer group. Uses redis_state_set shared configuration.",
+        "icon": "✅",
+        "requires_config": false
+      }
+    ]
+  }
+}
