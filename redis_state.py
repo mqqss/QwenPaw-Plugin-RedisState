@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Redis State Tool Plugin Entry Point."""
+"""Redis Runtime Cache Tool Plugin Entry Point."""
 
 import importlib.util
 import logging
@@ -25,10 +25,14 @@ def _load_tool_module():
 
 
 class RedisStateToolPlugin:
-    """Redis-backed shared runtime state and stream tool plugin."""
+    """Redis-backed runtime cache for QwenPaw agents.
+
+    The plugin helps agents, skills, and plugins store short-lived
+    execution state outside the LLM context and local files.
+    """
 
     def register(self, api: PluginApi):
-        """Register Redis State tools.
+        """Register Redis Runtime Cache tools.
 
         Args:
             api: PluginApi instance.
@@ -39,8 +43,8 @@ class RedisStateToolPlugin:
             tool_name="redis_state_set",
             tool_func=tool.redis_state_set,
             description=(
-                "Store JSON-serializable temporary runtime state "
-                "in Redis with TTL"
+                "Store short-lived agent runtime state outside the LLM "
+                "context and local files"
             ),
             icon="🧠",
         )
@@ -49,8 +53,8 @@ class RedisStateToolPlugin:
             tool_name="redis_state_get",
             tool_func=tool.redis_state_get,
             description=(
-                "Read temporary runtime state from Redis; "
-                "sensitive fields are masked by default"
+                "Retrieve stored agent runtime state without keeping it "
+                "in conversation context or local files"
             ),
             icon="📦",
         )
@@ -58,60 +62,81 @@ class RedisStateToolPlugin:
         api.register_tool(
             tool_name="redis_state_delete",
             tool_func=tool.redis_state_delete,
-            description="Delete temporary runtime state from Redis by key",
+            description=(
+                "Delete temporary runtime state that a skill, plugin, "
+                "or workflow no longer needs"
+            ),
             icon="🗑️",
         )
 
         api.register_tool(
             tool_name="redis_state_exists",
             tool_func=tool.redis_state_exists,
-            description="Check whether a temporary Redis state key exists",
+            description=(
+                "Check whether reusable runtime state exists before "
+                "re-running an external tool or API step"
+            ),
             icon="🔎",
         )
 
         api.register_tool(
             tool_name="redis_state_ttl",
             tool_func=tool.redis_state_ttl,
-            description="Get remaining TTL for a temporary Redis state key",
+            description=(
+                "Inspect remaining lifetime of cached runtime state to "
+                "decide whether it should be reused or refreshed"
+            ),
             icon="⏳",
         )
 
         api.register_tool(
             tool_name="redis_stream_add",
             tool_func=tool.redis_stream_add,
-            description="Append an event object to a Redis Stream",
+            description=(
+                "Append a lightweight runtime event for async workflows "
+                "or agent handoff"
+            ),
             icon="📨",
         )
 
         api.register_tool(
             tool_name="redis_stream_read",
             tool_func=tool.redis_stream_read,
-            description="Read recent events from a Redis Stream",
+            description="Read recent runtime events for inspection or polling",
             icon="📬",
         )
 
         api.register_tool(
             tool_name="redis_stream_group_create",
             tool_func=tool.redis_stream_group_create,
-            description="Create a Redis Stream consumer group",
+            description=(
+                "Create a consumer group for reliable runtime event "
+                "processing by agents or workers"
+            ),
             icon="👥",
         )
 
         api.register_tool(
             tool_name="redis_stream_read_group",
             tool_func=tool.redis_stream_read_group,
-            description="Read Redis Stream events as a consumer group consumer",
+            description=(
+                "Read runtime events as a named consumer in a reliable "
+                "consumer group"
+            ),
             icon="📥",
         )
 
         api.register_tool(
             tool_name="redis_stream_ack",
             tool_func=tool.redis_stream_ack,
-            description="Acknowledge Redis Stream messages in a consumer group",
+            description=(
+                "Acknowledge processed runtime events after a workflow "
+                "step completes successfully"
+            ),
             icon="✅",
         )
 
-        logger.info("Redis State tool plugin registered")
+        logger.info("Redis Runtime Cache tool plugin registered")
 
 
 # Export plugin instance
